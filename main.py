@@ -47,18 +47,29 @@ def run(file):
       count += 1
     print('=== Read Process Finished, Total: {} students ==='.format(count))
     statistics = Statistics(students)
-    print('=== 毕业去向 ===')
-    dream = statistics.calculate('dream')
-    print(dream)
-    print('=== 留学地点 ===')
-    abroadCountry = statistics.calculate('abroadCountry')
-    print(abroadCountry)
-    print('=== 留学学校 ===')
-    domesticUniversity = statistics.calculate('domesticUniversity')
-    print(domesticUniversity)
-    print('=== 预期月薪 ===')
-    salary = statistics.calculate('salary')
-    print(salary)
+    dream = statistics.calculate(
+      'dream',
+      'abroadCountry', 
+      'abroadUniversity', 
+      'major1',
+      'domesticCity',
+      'domesticUniversity',
+      'major2',
+    )
+    statistics.output(dream)
+    # statistics = Statistics(students)
+    # print('=== 毕业去向 ===')
+    # dream = statistics.calculate('dream')
+    # print(dream)
+    # print('=== 留学地点 ===')
+    # abroadCountry = statistics.calculate('abroadCountry')
+    # print(abroadCountry)
+    # print('=== 留学学校 ===')
+    # domesticUniversity = statistics.calculate('domesticUniversity')
+    # print(domesticUniversity)
+    # print('=== 预期月薪 ===')
+    # salary = statistics.calculate('salary')
+    # print(salary)
 
 if __name__ == '__main__':
   run() 
