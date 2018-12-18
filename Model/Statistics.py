@@ -27,24 +27,27 @@ class Statistics:
       for field in fields:
         value = row[field].strip()
         if value != '':
+          # If there exists a process method, call it
+          process = 'process{}'.format(field.capitalize())
+          if hasattr(self, process) and callable(getattr(self, process)):
+            value = getattr(self, process)(value)
           final = value
           last_parent = parent
           if value not in parent:
-            parent[value] = {}
+            parent[value] = {'data': 0}
+          parent[value]['data'] += 1
           parent = parent[value]
-
-      if final in last_parent and isinstance(last_parent[final], int):
-        last_parent[final] += 1
-      else:
-        last_parent[final] = 1
-
+        
     return result
   
   def output(self, data, level=0):
     for k, v in data.items():
       if not isinstance(v, dict):
-        print('{} - {} ({})'.format(' ' * level, k, v))
+        pass
+        # print('{} - {} ({})'.format(' ' * level, k, v))
       else:
-        print('{} - {}'.format(' ' * level, k))
+        print('{} - {} ({})'.format(' ' * level, k, v['data']))
         self.output(v, level + 1)
 
+  def processAbroadcountry(self, val):
+    return val.replace('国', '')
