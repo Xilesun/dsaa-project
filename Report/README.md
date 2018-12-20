@@ -39,12 +39,13 @@ class Statistics:
 ### 数据预处理
 
 首先不管要处理什么数据，都要先把需要的数据取出来。这里先定义一个 `pluck` 函数，用来取出需要字段的数据。这里使用了可变参数 `*args`, 即可以传入可选个数的所需要的字段名字，来取出对应的数据。
+这里还有一种情况是，我们可能只想取出某些固定值的数据进行统计，比如：只对毕业去向是“毕业工作”的同学进行统计，所以我们把输入的参数做相应的调整，如果输入的参数是字段名字符串，就取出该字段的所有数据；如果输入的参数是 `{'field': ['value1', 'value2']}` , 则我们只取出该字段下值符合value数组的数据。
 
 ```python
 '''
 Pluck the data of some fields
 Parameters:
-  *fields - the name of the fields to be pluck
+  *fields (str,dict): the name of the fields to be pluck
 Output:
   [
     {field1: value},
@@ -59,8 +60,16 @@ def pluck(self, *fields):
   row = {}
   for student in self.students:
     for field in fields:
-      row[field] = getattr(student, field)
-    result.append(row.copy())
+      expects = []
+      if isinstance(field, dict):
+        expects = list(field.values())[0]
+        field = list(field.keys())[0]
+      value = getattr(student, field).strip()
+      if expects and not value in expects:
+        break
+      row[field] = value
+    if row:
+      result.append(row.copy())
   return result
 ```
 
@@ -76,9 +85,9 @@ if hasattr(self, process) and callable(getattr(self, process)):
 
 #### 思路
 
-通过分析题目，可以发现很多的统计项，属于统计人数的项目，可以理解成不同学生相同项的求和。
+通过分析题目，可以发现很多的统计项，属于统计人数的项目，可以理解成不同学生相同项的求和。于是我们希望有一个通用的函数来完成所有和求和相关的统计项。
 我们主要的处理思路是：
-用一个dict来表示统计结果，其中key是不同的数据，value是人数。比如统计月薪的情况，最终返回的结果可能是：
+输入字段名，即可返回该字段的统计结果，返回结果用一个dict来表示，其中key是不同的字段数据，value是人数。比如统计月薪的情况，最终返回的结果可能是：
 
 ```json
 {
@@ -90,7 +99,7 @@ if hasattr(self, process) and callable(getattr(self, process)):
 ```
 
 处理的过程是取得该同学月薪的数额，和结果dict进行比对，如果存在该数额的key，我们把value递增，如果不存在，就新建一个以该数额命名的key，value为0。
-同时我们发现有的统计项目需要分层级计算，这样我们的统计方法可以优化，统计的参数可以传入多个字段名称，然后按顺序分级，第一字段作为父层级，第二个是子层级，以此类推。处理过程与上述类似。最终返回的结果可能如下:
+同时我们发现有的统计项目需要分层级计算，这样我们的统计方法可以优化，统计方法的参数同样使用 `*args` 可以传入多个字段名称，然后按顺序分级，第一个字段作为父层级，第二个是子层级，以此类推。处理过程与上述类似。最终返回的结果可能如下:
 
 ```json
 {
@@ -106,7 +115,7 @@ if hasattr(self, process) and callable(getattr(self, process)):
 }
 ```
 
-更进一步我们发现统计项“统计毕业去向”的情况是，存在四种独立的情况“毕业工作”，“出国留学”，“国内读研”，“香港读研”，假设毕业去向是“出国留学”，则会有“留学国家”，“留学大学”，“专业1”等相关数据，而“读研学校”等其他选项相关的数据会留空。于是我们在统计过程中补充上数据为空的处理，最终可以生成如下类似结果:  
+更进一步我们发现统计项“统计毕业去向”的情况是，存在四种独立的情况“毕业工作”，“出国留学”，“国内读研”，“香港读研”，假设毕业去向是“出国留学”，则会有“留学国家”，“留学大学”，“专业1”等相关数据，而“读研学校”等其他选项相关的数据会留空。于是我们在统计过程中过滤数据为空的项，最终可以生成如下类似结果:  
 
 ```json
 {
@@ -130,6 +139,23 @@ if hasattr(self, process) and callable(getattr(self, process)):
 #### 代码
 
 ```python
+'''
+Parameters:
+  *fields (str,dict): the name of the fields to be pluck
+Output:
+  [
+    {
+      field1: {
+        data: ...,
+        subfield1: { ... }
+      }
+    },
+    {
+      field2: ...
+    },
+    ...
+  ]
+'''
 def calculate(self, *fields):
   result = {}
   data = self.pluck(*fields)
@@ -138,7 +164,9 @@ def calculate(self, *fields):
     final = ''
     last_parent = {}
     for field in fields:
-      value = row[field].strip()
+      if isinstance(field, dict):
+        field = list(field.keys())[0]
+      value = row[field]
       if value != '':
         # If there exists a process method, call it
         process = 'process{}'.format(field.capitalize())
@@ -152,13 +180,25 @@ def calculate(self, *fields):
         parent = parent[value]
 
     return result
+```
 
+#### 运行截图
+
+分层级统计
+
+```python
 statistics.calculate(
   'province',
   'city',
   'district'
 )
+```
 
+![sum1](.././screenshots/sum1.png)
+
+含并列项分层级统计
+
+```python
 statistics.calculate(
   'dream',
   'abroadCountry',
@@ -169,9 +209,5 @@ statistics.calculate(
   'major2',
 )
 ```
-
-#### 运行截图
-
-![sum1](.././screenshots/sum1.png)
 
 ![sum2](.././screenshots/sum2.png)

@@ -1,4 +1,5 @@
 # encoding=utf-8
+import xlwt
 
 class Statistics:
   def __init__(self, students):
@@ -12,8 +13,16 @@ class Statistics:
     row = {}
     for student in self.students:
       for field in fields:
-        row[field] = getattr(student, field)
-      result.append(row.copy())
+        expects = []
+        if isinstance(field, dict):
+          expects = list(field.values())[0]
+          field = list(field.keys())[0]
+        value = getattr(student, field).strip()
+        if expects and not value in expects:
+          break
+        row[field] = value
+      if row:
+        result.append(row.copy())
     return result      
 
   # 统计数字，支持多层级
@@ -25,7 +34,9 @@ class Statistics:
       final = ''
       last_parent = {}
       for field in fields:
-        value = row[field].strip()
+        if isinstance(field, dict):
+          field = list(field.keys())[0]
+        value = row[field]
         if value != '':
           # If there exists a process method, call it
           process = 'process{}'.format(field.capitalize())
@@ -44,10 +55,19 @@ class Statistics:
     for k, v in data.items():
       if not isinstance(v, dict):
         pass
-        # print('{} - {} ({})'.format(' ' * level, k, v))
       else:
         print('{} - {} ({})'.format(' ' * level, k, v['data']))
         self.output(v, level + 1)
+  
+  # def exportToXls(self, data):
+  #   wb = xlwt.Workbook()
+  #   ws = wb.add_sheet('data')
+  #   level = 0
+  #   while isinstance(data, dict):
+  #   for  k, v) in enumerate(data.items()):
+  #       ws.write(index, level, v['data'])
+  #     level += 1
+  #     data = 
 
   def processAbroadcountry(self, val):
     return val.replace('国', '')
