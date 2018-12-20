@@ -3,3 +3,5 @@ py2env
 py3env
 *.pyc
 __pycache__
+pipenv
+.idea

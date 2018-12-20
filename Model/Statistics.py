@@ -51,3 +51,22 @@ class Statistics:
 
   def processAbroadcountry(self, val):
     return val.replace('国', '')
+
+  def processSalary(self,val):
+    int_value = int(val)
+    if  int_value>1000:
+      return str(int(int_value/1000))
+    else :
+      return val
+
+  def compare(self,field1,field2):
+    result = {}
+    parent = {'Yes':{'data':0},'No':{'data':0}}
+    data = self.pluck(field1, field2)
+    for row in data:
+      if row[field1]==row[field2]:
+        parent['Yes']['data'] += 1
+      else:
+        parent['No']['data'] += 1
+    result = parent
+    return result
