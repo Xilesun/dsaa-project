@@ -211,3 +211,85 @@ statistics.calculate(
 ```
 
 ![sum2](.././screenshots/sum2.png)
+
+升学意向分层级统计
+
+```python
+statistics.calculate(
+  {'dream': ['出国留学', '香港读研', '内地读研']},
+  'degree'
+)
+```
+
+![sum3](.././screenshots/sum3.png)
+
+升学意愿单项对比
+
+```python
+statistics.calculate('degree')
+```
+
+![sum4](.././screenshots/sum4.png)
+
+工作意向分层对比
+
+```python
+statistics.calculate(
+   'workProvince',
+   'workCity',
+   'workPlace'
+)
+```
+
+![png5](.././screenshots/png5.png)
+
+月薪情况
+
+```python
+statistics.calculate('salary')
+```
+
+![sum6](.././screenshots/sum6.png)
+
+### process修正的具体方法
+- processAbroadcountry: 由于统计的表中内容格式不统一，如目标同为去美国留学，有的同学填写"美国"，有的同学填写"美"，这里统一将abroadCountry中的"国"字删去；
+- processSallary:统一sallary单位，对于误填造成的明显不符合逻辑的月薪大于1000k的项，记录其除以1000以后的值；
+
+#### 代码
+
+```python
+def processAbroadcountry(self, val):
+  return val.replace('国', '')
+
+def processSalary(self,val):
+  int_value = int(val)
+  if  int_value>1000:
+    return str(int(int_value/1000))
+  else :
+    return val
+```
+
+### 横向判断方法
+
+对于判断一个同学未来是否在家乡工作的问题，我们需要在程序中进行一个横向的判断.
+为了方便利用Statistics中的output函数进行输出，我们规定该方法的输出格式为{'Yes':{'data':int},'No':{'data':int}};
+我们将需要横向对比的两项数据名称作为参数输入，利用Statistics.pluck()方法得到需要的数据，然后通过判断两个key对应的value是否相等来对结果中的int进行调整；
+
+#### 代码
+
+```python
+  def compare(self,field1,field2):
+    result = {}
+    parent = {'Yes':{'data':0},'No':{'data':0}}
+    data = self.pluck(field1, field2)
+    for row in data:
+      if row[field1]==row[field2]:
+        parent['Yes']['data'] += 1
+      else:
+        parent['No']['data'] += 1
+    result = parent
+    return result
+```
+
+#### 运行截图
+![png3](.././screenshots/png3.png)
