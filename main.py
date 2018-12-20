@@ -67,10 +67,10 @@ def run(file):
     statistics.output(dream)
     print('=== 国内外升学意愿 ===')
     study = statistics.calculate(
-      'dream',
+      {'dream': ['出国留学', '香港读研', '内地读研']},
       'degree'
     )
-    statistics.output(study);
+    statistics.output(study)
     print('=== 升学意愿单项对比 ===')
     degree = statistics.calculate('degree')
     statistics.output(degree)

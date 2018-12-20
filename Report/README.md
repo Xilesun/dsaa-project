@@ -212,11 +212,50 @@ statistics.calculate(
 
 ![sum2](.././screenshots/sum2.png)
 
+升学意向分层级统计
+
+```python
+statistics.calculate(
+  {'dream': ['出国留学', '香港读研', '内地读研']},
+  'degree'
+)
+```
+
+![sum3](.././screenshots/sum3.png)
+
+升学意愿单项对比
+
+```python
+statistics.calculate('degree')
+```
+
+![sum4](.././screenshots/sum4.png)
+
+工作意向分层对比
+
+```python
+statistics.calculate(
+   'workProvince',
+   'workCity',
+   'workPlace'
+)
+```
+
+![png5](.././screenshots/png5.png)
+
+月薪情况
+
+```python
+statistics.calculate('salary')
+```
+
+![sum6](.././screenshots/sum6.png)
+
 ### process修正的具体方法
 - processAbroadcountry: 由于统计的表中内容格式不统一，如目标同为去美国留学，有的同学填写"美国"，有的同学填写"美"，这里统一将abroadCountry中的"国"字删去；
 - processSallary:统一sallary单位，对于误填造成的明显不符合逻辑的月薪大于1000k的项，记录其除以1000以后的值；
 
-####代码
+#### 代码
 
 ```python
 def processAbroadcountry(self, val):
