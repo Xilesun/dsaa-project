@@ -1,5 +1,6 @@
 # encoding=utf-8
 import xlwt
+from itertools import chain, starmap
 
 class Statistics:
   def __init__(self, students):
@@ -23,7 +24,7 @@ class Statistics:
         row[field] = value
       if row:
         result.append(row.copy())
-    return result      
+    return result   
 
   # 统计数字，支持多层级
   def calculate(self, *fields):
@@ -59,15 +60,35 @@ class Statistics:
         print('{} - {} ({})'.format(' ' * level, k, v['data']))
         self.output(v, level + 1)
   
+  def unpack(parent_key, parent_value):
+    try:
+      items = parent_value.items()
+    except AttributeError:
+      # parent_value was not a dict, no need to flatten
+      yield (parent_key, parent_value)
+    else:
+      for key, value in items:
+        if key != 'data':
+          yield (parent_key + (key,), value)
+        else:
+          yield (parent_key, value)
+
+  # Flatten the multilevel dict
+  def flatten(self, dictionary):
+    # Put each key into a tuple to initiate building a tuple of subkeys
+    dictionary = {(key,): value for key, value in dictionary.items()}
+    while True:
+      # Keep unpacking the dictionary until all value's are not dictionary's
+      dictionary = dict(chain.from_iterable(starmap(unpack, dictionary.items())))
+      if not any(isinstance(value, dict) for value in dictionary.values()):
+        break
+
+    return dictionary  
+
   # def exportToXls(self, data):
   #   wb = xlwt.Workbook()
   #   ws = wb.add_sheet('data')
-  #   level = 0
-  #   while isinstance(data, dict):
-  #   for  k, v) in enumerate(data.items()):
-  #       ws.write(index, level, v['data'])
-  #     level += 1
-  #     data = 
+    
 
   def processAbroadcountry(self, val):
     return val.replace('国', '')
@@ -81,7 +102,10 @@ class Statistics:
 
   def compare(self, field1, field2):
     result = {}
-    parent = {'Yes':{'data':0},'No':{'data':0}}
+    parent = {
+      'Yes': {'data': 0}, 
+      'No': {'data': 0}
+    }
     data = self.pluck(field1, field2)
     for row in data:
       if row[field1]==row[field2]:

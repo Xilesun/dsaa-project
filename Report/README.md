@@ -39,6 +39,7 @@ class Statistics:
 ### 数据预处理
 
 首先不管要处理什么数据，都要先把需要的数据取出来。这里先定义一个 `pluck` 函数，用来取出需要字段的数据。这里使用了可变参数 `*args`, 即可以传入可选个数的所需要的字段名字，来取出对应的数据。
+
 这里还有一种情况是，我们可能只想取出某些固定值的数据进行统计，比如：只对毕业去向是“毕业工作”的同学进行统计，所以我们把输入的参数做相应的调整，如果输入的参数是字段名字符串，就取出该字段的所有数据；如果输入的参数是 `{'field': ['value1', 'value2']}` , 则我们只取出该字段下值符合value数组的数据。
 
 ```python
@@ -80,6 +81,12 @@ process = 'process{}'.format(field.capitalize()) # processId, processName, ...
 if hasattr(self, process) and callable(getattr(self, process)):
   value = getattr(self, process)(value)
 ```
+
+### process修正的具体方法
+
+- `processAbroadcountry` 由于统计的表中内容格式不统一，如目标同为去美国留学，有的同学填写"美国"，有的同学填写"美"，这里统一将abroadCountry中的"国"字删去；
+
+- `processSallary` 统一sallary单位，对于误填造成的明显不符合逻辑的月薪大于1000k的项，记录其除以1000以后的值；
 
 ### 求和部分统计
 
@@ -251,10 +258,6 @@ statistics.calculate('salary')
 
 ![sum6](.././screenshots/sum6.png)
 
-### process修正的具体方法
-- processAbroadcountry: 由于统计的表中内容格式不统一，如目标同为去美国留学，有的同学填写"美国"，有的同学填写"美"，这里统一将abroadCountry中的"国"字删去；
-- processSallary:统一sallary单位，对于误填造成的明显不符合逻辑的月薪大于1000k的项，记录其除以1000以后的值；
-
 #### 代码
 
 ```python
@@ -272,7 +275,7 @@ def processSalary(self,val):
 ### 横向判断方法
 
 对于判断一个同学未来是否在家乡工作的问题，我们需要在程序中进行一个横向的判断.
-为了方便利用Statistics中的output函数进行输出，我们规定该方法的输出格式为{'Yes':{'data':int},'No':{'data':int}};
+为了方便利用Statistics中的output函数进行输出，我们规定该方法的输出格式为 `{'Yes':{'data':int},'No':{'data':int}}`;
 我们将需要横向对比的两项数据名称作为参数输入，利用Statistics.pluck()方法得到需要的数据，然后通过判断两个key对应的value是否相等来对结果中的int进行调整；
 
 #### 代码
@@ -293,3 +296,61 @@ def processSalary(self,val):
 
 #### 运行截图
 ![png3](.././screenshots/png3.png)
+
+### 结果输出
+
+我们程序中的函数返回结果基本都是如下dict嵌套的形式
+
+```json
+{
+  "field1": {
+    "data": 2,
+    "subfield1": {
+      "data": 2
+    }
+  }
+}
+```
+
+在生成excel文件和输出成图表的时候，处理起来不是很方便，于是我们使用了一个将多层嵌套的dict扁平化的函数，这部分代码参考自网上，参考链接 [https://codereview.stackexchange.com/questions/173439/pythonic-way-to-flatten-nested-dictionarys](https://codereview.stackexchange.com/questions/173439/pythonic-way-to-flatten-nested-dictionarys)，结合我们实际情况修改得到如下代码：
+
+```python
+def unpack(parent_key, parent_value):
+  try:
+    items = parent_value.items()
+  except AttributeError:
+    # parent_value was not a dict, no need to flatten
+    yield (parent_key, parent_value)
+  else:
+    for key, value in items:
+      if key != 'data':
+        yield (parent_key + (key,), value)
+      else:
+        yield (parent_key, value)
+
+# Flatten the multilevel dict
+def flatten(self, dictionary):
+  # Put each key into a tuple to initiate building a tuple of subkeys
+  dictionary = {(key,): value for key, value in dictionary.items()}
+  while True:
+    # Keep unpacking the dictionary until all value's are not dictionary's
+    dictionary = dict(chain.from_iterable(starmap(unpack, dictionary.items())))
+    if not any(isinstance(value, dict) for value in dictionary.values()):
+      break
+
+  return dictionary  
+```
+
+#### 打印到控制台
+
+打印到控制台比较简单，这里使用一个简单的递归遍历多层dict，每一层输出的时候进行缩进。
+
+```python
+def output(self, data, level=0):
+  for k, v in data.items():
+    if not isinstance(v, dict):
+      pass
+    else:
+      print('{} - {} ({})'.format(' ' * level, k, v['data']))
+      self.output(v, level + 1)
+```
