@@ -60,7 +60,7 @@ class Statistics:
         print('{} - {} ({})'.format(' ' * level, k, v['data']))
         self.output(v, level + 1)
   
-  def unpack(parent_key, parent_value):
+  def unpack(self, parent_key, parent_value):
     try:
       items = parent_value.items()
     except AttributeError:
@@ -79,7 +79,7 @@ class Statistics:
     dictionary = {(key,): value for key, value in dictionary.items()}
     while True:
       # Keep unpacking the dictionary until all value's are not dictionary's
-      dictionary = dict(chain.from_iterable(starmap(unpack, dictionary.items())))
+      dictionary = dict(chain.from_iterable(starmap(self.unpack, dictionary.items())))
       if not any(isinstance(value, dict) for value in dictionary.values()):
         break
 
