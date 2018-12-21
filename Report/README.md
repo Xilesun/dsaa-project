@@ -2,7 +2,33 @@
 
 ## 小组成员及分工
 
+11612833 尚刘方剑 Coding
+11612903 赵金平 设计输入输出数据形式，设计图表; Coding
+11612929 杨洽 Design, Abstract Code; Code Review
+11613028 何雨京 Coding; 撰写和翻译报告
+
 ## 主程序说明和使用方法
+
+使用语言: Python
+主要依赖:
+
+- click: 实现相对友好的命令行操作
+- xlwt: 输出数据到excel
+- matplotlib: 将数据生成图表
+
+requirements.txt
+
+```txt
+Click==7.0
+cycler==0.10.0
+kiwisolver==1.0.1
+matplotlib==3.0.2
+numpy==1.15.4
+pyparsing==2.3.0
+python-dateutil==2.7.5
+six==1.12.0
+xlwt==1.3.0
+```
 
 ## 主要代码和思路
 
