@@ -88,6 +88,7 @@ def run(file):
     # athome = statistics.compare('workCity','city')
     # statistics.output(athome)
     print(statistics.flatten(dream))
+    statistics.exportToXls(statistics.flatten(dream))
 
 if __name__ == '__main__':
   run() 
