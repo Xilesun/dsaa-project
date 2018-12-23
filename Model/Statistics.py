@@ -103,7 +103,7 @@ class Statistics:
     for x in range(n):
       ws.write(x, len2, data[keyList[x]])
     t = time.time()
-    name = './data/excel/' + title + '_' + str(int(t)) + '.xls'
+    name = './data/excel/{}-{}.xls'.format(title, str(int(t)))
     wb.save(name)
 
   def processAbroadcountry(self, val):

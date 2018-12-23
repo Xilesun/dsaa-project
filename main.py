@@ -87,7 +87,6 @@ def run(file):
     print('=== 是否在家乡工作 ===')
     athome = statistics.compare('workCity','city')
     statistics.output(athome)
-    print(statistics.flatten(dream))
     statistics.exportToXls(statistics.flatten(dream), 'dream')
     statistics.exportToXls(statistics.flatten(study), 'study')
     statistics.exportToXls(statistics.flatten(degree), 'degree')
