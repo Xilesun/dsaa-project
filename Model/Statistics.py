@@ -1,13 +1,32 @@
-# encoding=utf-8
+# -*- coding: utf-8 -*-
 import xlwt
 import time
 from itertools import chain, starmap
+import numpy as np
+import matplotlib.pyplot as plt;
+import time
+import matplotlib.font_manager as mfm
 
 class Statistics:
+  '''
+  Parameters:
+    students - a list of type Student
+  '''
   def __init__(self, students):
     self.students = students
+    plt.rcParams['font.sans-serif'] = ['Arial Unicode MS']
 
-  # Pluck the data of some fields
+  '''
+  Pluck the data of some fields
+  Parameters:
+    *fields (str,dict): the name of the fields to be pluck
+  Output:
+    [
+      {field1: value},
+      {field2: value},
+      ...
+    ]
+  '''
   def pluck(self, *fields):
     result = []
     # Store into dict
@@ -27,7 +46,24 @@ class Statistics:
         result.append(row.copy())
     return result   
 
-  # 统计数字，支持多层级
+  '''
+  Summation, support multi-level
+  Parameters:
+    *fields (str,dict): the name of the fields to be pluck
+  Output:
+    [
+      {
+        field1: {
+          data: ...,
+          subfield1: { ... }
+        }
+      },
+      {
+        field2: ...
+      },
+      ...
+    ]
+  '''
   def calculate(self, *fields):
     result = {}
     data = self.pluck(*fields)
@@ -51,6 +87,31 @@ class Statistics:
           parent[value]['data'] += 1
           parent = parent[value]
         
+    return result
+    
+  def processAbroadcountry(self, val):
+    return val.replace('国', '')
+
+  def processSalary(self, val):
+    int_value = int(val)
+    if  int_value > 1000:
+      return str(int(int_value/1000))
+    else :
+      return val
+
+  def compare(self, field1, field2):
+    result = {}
+    parent = {
+      'Yes': {'data': 0}, 
+      'No': {'data': 0}
+    }
+    data = self.pluck(field1, field2)
+    for row in data:
+      if row[field1]==row[field2]:
+        parent['Yes']['data'] += 1
+      else:
+        parent['No']['data'] += 1
+    result = parent
     return result
   
   def output(self, data, level=0):
@@ -105,28 +166,56 @@ class Statistics:
     t = time.time()
     name = './data/excel/{}-{}.xls'.format(title, str(int(t)))
     wb.save(name)
+  
+  '''
+  Export data to a bar char
+  Parameters:
+    data (dict): a non-nested dict like {field: {data: value}, ...}
+    title (str)
+    yLable (str)
+  '''
+  def exportToBarchart(self, data, title='', yLabel=''):
+    yData = ()
+    xLabel = ()
+    for k, v in data.items():
+      xLabel += (u'{}'.format(k),)
+      yData += (v['data'],)
 
-  def processAbroadcountry(self, val):
-    return val.replace('国', '')
+    f = plt.figure(figsize=(15, 10))
+    y_pos = np.arange(len(xLabel))
+    ax = f.add_subplot(111)
+    bars = ax.bar(y_pos, yData, align='center', width=0.5)
+    ax.set_xticks(y_pos)
+    ax.set_xticklabels(xLabel)
+    ax.set_ylabel(u'{}'.format(yLabel))
+    ax.set_title(u'{}'.format(title))
 
-  def processSalary(self, val):
-    int_value = int(val)
-    if  int_value > 1000:
-      return str(int(int_value/1000))
-    else :
-      return val
+    for bar in bars:
+      yval = bar.get_height()
+      ax.text(bar.get_x(), yval + .01, yval)
 
-  def compare(self, field1, field2):
-    result = {}
-    parent = {
-      'Yes': {'data': 0}, 
-      'No': {'data': 0}
-    }
-    data = self.pluck(field1, field2)
-    for row in data:
-      if row[field1]==row[field2]:
-        parent['Yes']['data'] += 1
-      else:
-        parent['No']['data'] += 1
-    result = parent
-    return result
+    t = time.time()
+    name = str(int(t))
+    f.savefig('./data/graph/{}-{}.png'.format(title.replace(' ', ''), name))
+  
+  '''
+  Export data to a pie char
+  Parameters:
+    data (dict): a non-nested dict like {field: {data: value}, ...}
+    yLable (str)
+  '''
+  def exportToPiechart(self, data, title=''):
+    pieData = ()
+    labels = ()
+    for k, v in data.items():
+      labels += (u'{}'.format(k),)
+      pieData += (v['data'],)
+
+    f = plt.figure(figsize=(10, 10))
+    ax = f.add_subplot(111)
+    ax.pie(pieData, labels=labels, autopct='%1.1f%%', startangle=90)
+    ax.axis('equal')
+    
+    t = time.time()
+    name = str(int(t))
+    f.savefig('./data/graph/{}-{}.png'.format(title.replace(' ', ''), name))

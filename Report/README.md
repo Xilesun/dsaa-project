@@ -12,6 +12,8 @@
 
 ## 主程序说明和使用方法
 
+### 说明
+
 使用语言: Python
 主要依赖:
 
@@ -19,7 +21,20 @@
 - xlwt: 输出数据到excel
 - matplotlib: 将数据生成图表
 
-requirements.txt
+文件结构
+
+- `main.py`: main program
+- `requirements.txt`: dependencies
+- data
+  - `ProjectData.csv`: the file to read
+  - `graph`: the dir to store graph
+  - `excel`: the dir to store xls file
+- Model
+  - `__init__.py`
+  - `Statistics.py`: the Class includes all statistics methods
+  - `Student.py`: the Class defines the properties of students
+
+`requirements.txt`
 
 ```txt
 Click==7.0
@@ -31,6 +46,64 @@ pyparsing==2.3.0
 python-dateutil==2.7.5
 six==1.12.0
 xlwt==1.3.0
+```
+
+`main.py` 读取csv
+
+```python
+@click.command()
+@click.option('--file', default='data/ProjectData.csv')
+def run(file):
+  # The fields of students
+  keys = [
+    'id',
+    'name',
+    'sex',
+    'province',
+    'city',
+    'district',
+    'gaokao',
+    'sustech',
+    'gpa',
+    'dream',
+    'abroadCountry',
+    'abroadUniversity',
+    'major1',
+    'domesticCity',
+    'domesticUniversity',
+    'major2',
+    'workProvince',
+    'workCity',
+    'degree',
+    'workPlace',
+    'salary'
+  ]
+  data = {}
+  students = []
+  with open(file, newline='', encoding ='utf-8') as csv_file:
+    csv_reader = csv.reader(csv_file)
+    count = 0
+    print('=== Reading Data... ===')
+    for row in csv_reader:
+      # Skip the row of titles
+      if count != 0:
+        for i, key in enumerate(keys):
+          data[key] = row[i]
+        student = Student(data)
+        students.append(student)
+        print('ID: {}, Name: {}'.format(student.id, student.name))
+      count += 1
+    print('=== Read Process Finished, Total: {} students ==='.format(count))
+```
+
+### 使用方法
+
+`python main.py`
+
+可选参数
+
+```txt
+--file= : the csv file location, default='data/ProjectData.csv'
 ```
 
 ## 主要代码和思路
@@ -115,7 +188,21 @@ if hasattr(self, process) and callable(getattr(self, process)):
 
 - `processAbroadcountry` 由于统计的表中内容格式不统一，如目标同为去美国留学，有的同学填写"美国"，有的同学填写"美"，这里统一将abroadCountry中的"国"字删去；
 
-- `processSallary` 统一sallary单位，对于误填造成的明显不符合逻辑的月薪大于1000k的项，记录其除以1000以后的值；
+- `processSalary` 统一sallary单位，对于误填造成的明显不符合逻辑的月薪大于1000k的项，记录其除以1000以后的值；
+
+#### 代码
+
+```python
+def processAbroadcountry(self, val):
+  return val.replace('国', '')
+
+def processSalary(self, val):
+  int_value = int(val)
+  if  int_value > 1000:
+    return str(int(int_value / 1000))
+  else :
+    return val
+```
 
 ### 求和部分统计
 
@@ -287,20 +374,6 @@ statistics.calculate('salary')
 
 ![sum6](.././screenshots/sum6.png)
 
-#### 代码
-
-```python
-def processAbroadcountry(self, val):
-  return val.replace('国', '')
-
-def processSalary(self,val):
-  int_value = int(val)
-  if  int_value>1000:
-    return str(int(int_value/1000))
-  else :
-    return val
-```
-
 ### 横向判断方法
 
 对于判断一个同学未来是否在家乡工作的问题，我们需要在程序中进行一个横向的判断.
@@ -310,12 +383,15 @@ def processSalary(self,val):
 #### 代码
 
 ```python
-  def compare(self,field1,field2):
+  def compare(self, field1, field2):
     result = {}
-    parent = {'Yes':{'data':0},'No':{'data':0}}
+    parent = {
+      'Yes': {'data': 0},
+      'No': {'data': 0}
+    }
     data = self.pluck(field1, field2)
     for row in data:
-      if row[field1]==row[field2]:
+      if row[field1] == row[field2]:
         parent['Yes']['data'] += 1
       else:
         parent['No']['data'] += 1
@@ -415,3 +491,91 @@ def exportToXls(self, data, title):
 
 #### 运行截图
 ![sum7](.././screenshots/sum7.png)
+
+#### 导出为图表
+
+生成图表我们使用了 `matplotlib` 库。经过分析，我们认为绝大部分数据都可以通过条形图和饼图来表示，所以我们把生成图表的函数抽象为两个，一个用来生成条形图，一个用来生成饼图。
+
+生成条形图的函数
+
+```python
+'''
+Export data to a bar char
+Parameters:
+  data (dict): a non-nested dict like {field: {data: value}, ...}
+  title (str)
+  yLable (str)
+'''
+def exportToBarchart(self, data, title='', yLabel=''):
+  yData = ()
+  xLabel = ()
+  for k, v in data.items():
+    xLabel += (u'{}'.format(k),)
+    yData += (v['data'],)
+
+  f = plt.figure(figsize=(15, 10))
+  y_pos = np.arange(len(xLabel))
+  ax = f.add_subplot(111)
+  bars = ax.bar(y_pos, yData, align='center', width=0.5)
+  ax.set_xticks(y_pos)
+  ax.set_xticklabels(xLabel)
+  ax.set_ylabel(u'{}'.format(yLabel))
+  ax.set_title(u'{}'.format(title))
+
+  for bar in bars:
+    yval = bar.get_height()
+    ax.text(bar.get_x(), yval + .01, yval)
+
+  t = time.time()
+  name = str(int(t))
+  f.savefig('./data/graph/{}-{}.png'.format(title.replace(' ', ''), name))
+```
+
+示例结果
+
+```python
+statistics.exportToBarchart(
+  statistics.calculate('province'),
+  '居住省份',
+  '人数'
+)
+```
+
+![screeshot](.././screenshots/graph1.png)
+
+生成饼图的函数
+
+```python
+'''
+Export data to a pie char
+Parameters:
+  data (dict): a non-nested dict like {field: {data: value}, ...}
+  yLable (str)
+'''
+def exportToPiechart(self, data, title=''):
+  pieData = ()
+  labels = ()
+  for k, v in data.items():
+    labels += (u'{}'.format(k),)
+    pieData += (v['data'],)
+
+  f = plt.figure(figsize=(10, 10))
+  ax = f.add_subplot(111)
+  ax.pie(pieData, labels=labels, autopct='%1.1f%%', startangle=90)
+  ax.axis('equal')
+  
+  t = time.time()
+  name = str(int(t))
+  f.savefig('./data/graph/{}-{}.png'.format(title.replace(' ', ''), name))
+```
+
+示例结果
+
+```python
+statistics.exportToPiechart(
+  statistics.calculate('degree'),
+  '升学意愿'
+)
+```
+
+![screeshot](.././screenshots/graph2.png)

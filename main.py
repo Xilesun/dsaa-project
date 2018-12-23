@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import click
 import csv
 from Model.Student import Student
@@ -87,12 +88,43 @@ def run(file):
     print('=== 是否在家乡工作 ===')
     athome = statistics.compare('workCity','city')
     statistics.output(athome)
+
     statistics.exportToXls(statistics.flatten(dream), 'dream')
     statistics.exportToXls(statistics.flatten(study), 'study')
     statistics.exportToXls(statistics.flatten(degree), 'degree')
     statistics.exportToXls(statistics.flatten(work), 'work')
     statistics.exportToXls(statistics.flatten(salary), 'salary')
     statistics.exportToXls(statistics.flatten(athome), 'athome')
+
+    statistics.exportToBarchart(
+      statistics.calculate('province'),
+      '居住省份',
+      '人数'
+    )
+    statistics.exportToBarchart(
+      statistics.calculate('abroadCountry'),
+      '留学国家',
+      '人数'
+    )
+    statistics.exportToBarchart(
+      statistics.calculate('workCity'),
+      '目标工作城市',
+      '人数'
+    )
+    statistics.exportToBarchart(
+      statistics.calculate('domesticUniversity'),
+      '国内读研学校',
+      '人数'
+    )
+    statistics.exportToPiechart(
+      statistics.calculate('degree'),
+      '升学意愿'
+    )
+    statistics.exportToBarchart(
+      statistics.calculate('salary'),
+      '预期月薪 (k)',
+      '人数'
+    )
 
 if __name__ == '__main__':
   run() 
