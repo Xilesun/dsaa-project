@@ -188,7 +188,21 @@ if hasattr(self, process) and callable(getattr(self, process)):
 
 - `processAbroadcountry` 由于统计的表中内容格式不统一，如目标同为去美国留学，有的同学填写"美国"，有的同学填写"美"，这里统一将abroadCountry中的"国"字删去；
 
-- `processSallary` 统一sallary单位，对于误填造成的明显不符合逻辑的月薪大于1000k的项，记录其除以1000以后的值；
+- `processSalary` 统一sallary单位，对于误填造成的明显不符合逻辑的月薪大于1000k的项，记录其除以1000以后的值；
+
+#### 代码
+
+```python
+def processAbroadcountry(self, val):
+  return val.replace('国', '')
+
+def processSalary(self, val):
+  int_value = int(val)
+  if  int_value > 1000:
+    return str(int(int_value / 1000))
+  else :
+    return val
+```
 
 ### 求和部分统计
 
@@ -359,20 +373,6 @@ statistics.calculate('salary')
 ```
 
 ![sum6](.././screenshots/sum6.png)
-
-#### 代码
-
-```python
-def processAbroadcountry(self, val):
-  return val.replace('国', '')
-
-def processSalary(self,val):
-  int_value = int(val)
-  if  int_value>1000:
-    return str(int(int_value/1000))
-  else :
-    return val
-```
 
 ### 横向判断方法
 
