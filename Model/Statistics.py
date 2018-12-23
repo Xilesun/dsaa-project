@@ -164,17 +164,40 @@ class Statistics:
       xLabel += (u'{}'.format(k),)
       yData += (v['data'],)
 
-    plt.figure(figsize=(15, 10))
+    f = plt.figure(figsize=(15, 10))
     y_pos = np.arange(len(xLabel))
-    bars = plt.bar(y_pos, yData, align='center', width=0.5)
-    plt.xticks(y_pos, xLabel)
-    plt.ylabel(u'{}'.format(yLabel))
-    plt.title(u'{}'.format(title))
+    ax = f.add_subplot(111)
+    bars = ax.bar(y_pos, yData, align='center', width=0.5)
+    ax.set_xticks(y_pos, xLabel)
+    ax.set_ylabel(u'{}'.format(yLabel))
+    ax.set_title(u'{}'.format(title))
 
     for bar in bars:
       yval = bar.get_height()
-      plt.text(bar.get_x(), yval + .01, yval)
+      ax.text(bar.get_x(), yval + .01, yval)
 
     t = time.time()
     name = str(int(t))
-    plt.savefig('./data/graph/{}-{}.png'.format(title.replace(' ', ''), name))
+    f.savefig('./data/graph/{}-{}.png'.format(title.replace(' ', ''), name))
+  
+  '''
+  Export data to a pie char
+  Parameters:
+    data (dict): a non-nested dict like {field: {data: value}, ...}
+    yLable (str)
+  '''
+  def exportToPiechart(self, data, title=''):
+    pieData = ()
+    labels = ()
+    for k, v in data.items():
+      labels += (u'{}'.format(k),)
+      pieData += (v['data'],)
+
+    f = plt.figure(figsize=(10, 10))
+    ax = f.add_subplot(111)
+    ax.pie(pieData, labels=labels, autopct='%1.1f%%', startangle=90)
+    ax.axis('equal')
+    
+    t = time.time()
+    name = str(int(t))
+    f.savefig('./data/graph/{}-{}.png'.format(title.replace(' ', ''), name))

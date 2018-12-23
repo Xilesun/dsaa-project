@@ -23,18 +23,18 @@
 
 文件结构
 
-- main.py: main program
-- requirements.txt: dependencies
+- `main.py`: main program
+- `requirements.txt`: dependencies
 - data
-  - ProjectData.csv: the file to read
-  - graph: the dir to store graph
-  - excel: the dir to store xls file
+  - `ProjectData.csv`: the file to read
+  - `graph`: the dir to store graph
+  - `excel`: the dir to store xls file
 - Model
-  - __init__.py
-  - Statistics.py: the Class includes all statistics methods
-  - Student.py: the Class defines the properties of students
+  - `__init__.py`
+  - `Statistics.py`: the Class includes all statistics methods
+  - `Student.py`: the Class defines the properties of students
 
-requirements.txt
+`requirements.txt`
 
 ```txt
 Click==7.0
@@ -481,21 +481,21 @@ def exportToBarchart(self, data, title='', yLabel=''):
     xLabel += (u'{}'.format(k),)
     yData += (v['data'],)
 
-  plt.figure(figsize=(15, 10))
+  f = plt.figure(figsize=(15, 10))
   y_pos = np.arange(len(xLabel))
-  bars = plt.bar(y_pos, yData, align='center', width=0.5)
-  plt.xticks(y_pos, xLabel)
-  plt.ylabel(u'{}'.format(yLabel))
-  plt.title(u'{}'.format(title))
+  ax = f.add_subplot(111)
+  bars = ax.bar(y_pos, yData, align='center', width=0.5)
+  ax.set_xticks(y_pos, xLabel)
+  ax.set_ylabel(u'{}'.format(yLabel))
+  ax.set_title(u'{}'.format(title))
 
   for bar in bars:
     yval = bar.get_height()
-    plt.text(bar.get_x(), yval + .01, yval)
+    ax.text(bar.get_x(), yval + .01, yval)
 
   t = time.time()
   name = str(int(t))
-  plt.savefig('./data/graph/{}-{}.png'.format(title.replace(' ', ''), name))
-'''
+  f.savefig('./data/graph/{}-{}.png'.format(title.replace(' ', ''), name))
 ```
 
 示例结果
@@ -508,4 +508,41 @@ statistics.exportToBarchart(
 )
 ```
 
-![screeshot]('.././sceenshots/graph1.png')
+![screeshot](.././sceenshots/graph1.png)
+
+生成饼图的函数
+
+```python
+'''
+Export data to a pie char
+Parameters:
+  data (dict): a non-nested dict like {field: {data: value}, ...}
+  yLable (str)
+'''
+def exportToPiechart(self, data, title=''):
+  pieData = ()
+  labels = ()
+  for k, v in data.items():
+    labels += (u'{}'.format(k),)
+    pieData += (v['data'],)
+
+  f = plt.figure(figsize=(10, 10))
+  ax = f.add_subplot(111)
+  ax.pie(pieData, labels=labels, autopct='%1.1f%%', startangle=90)
+  ax.axis('equal')
+  
+  t = time.time()
+  name = str(int(t))
+  f.savefig('./data/graph/{}-{}.png'.format(title.replace(' ', ''), name))
+```
+
+示例结果
+
+```python
+statistics.exportToPiechart(
+  statistics.calculate('degree'),
+  '升学意愿'
+)
+```
+
+![screeshot](.././sceenshots/graph2.png)

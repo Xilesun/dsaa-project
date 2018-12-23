@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import click
 import csv
 from Model.Student import Student
@@ -101,6 +102,15 @@ def run(file):
     statistics.exportToBarchart(
       statistics.calculate('workCity'),
       '目标工作城市',
+      '人数'
+    )
+    statistics.exportToPiechart(
+      statistics.calculate('degree'),
+      '升学意愿'
+    )
+    statistics.exportToBarchart(
+      statistics.calculate('salary'),
+      '预期月薪 (k)',
       '人数'
     )
     
