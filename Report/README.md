@@ -460,6 +460,38 @@ def output(self, data, level=0):
       self.output(v, level + 1)
 ```
 
+#### 输出xls表格
+
+将数据进行扁平化处理后得到一个dict, 该dict的key是tuple, value是tuple对应的人数。我们先得到该dict的长度n和由key组成的数组keyList。通过两个循环将该字典的key和value输出到xls的指定位置。
+第一个循环：通过获得tuple的长度来获得每一个tuple中的最后一个元素，即我们需要输出的key，同时他的位置也应该对应到第（len(tuple)-1）列，第x行，x为该tuple在原字典中的对应位置。
+第二个循环：由于在第一个循环中我们的输出在第（len(tuple)-1）列， 所以其对应的value应该输出在第（len(tuple)）列，第x行。
+最后获取时间戳并指定表格保存位置。
+
+```python
+def exportToXls(self, data, title):
+  wb = xlwt.Workbook('utf-8')
+  ws = wb.add_sheet('data')
+  n = len(data)
+  keyList = list(data.keys())
+  len2 = 0
+  # Put the elements in tuple in the right place
+  for x in range(n):
+    tuple = keyList[x]
+    len1 = len(tuple)
+    ws.write(x, len1-1, tuple[len1-1])
+    if len1 > len2:
+      len2 = len1
+  # Put the numbers of different keys in the right place
+  for x in range(n):
+    ws.write(x, len2, data[keyList[x]])
+  t = time.time()
+  name = './data/excel/{}-{}.xls'.format(title, str(int(t)))
+  wb.save(name)
+```
+
+#### 运行截图
+![sum7](.././screenshots/sum7.png)
+
 #### 导出为图表
 
 生成图表我们使用了 `matplotlib` 库。经过分析，我们认为绝大部分数据都可以通过条形图和饼图来表示，所以我们把生成图表的函数抽象为两个，一个用来生成条形图，一个用来生成饼图。

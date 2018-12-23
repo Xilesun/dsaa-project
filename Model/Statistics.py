@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import xlwt
+import time
 from itertools import chain, starmap
 import numpy as np
 import matplotlib.pyplot as plt;
@@ -146,9 +147,25 @@ class Statistics:
 
     return dictionary  
 
-  # def exportToXls(self, data):
-  #   wb = xlwt.Workbook()
-  #   ws = wb.add_sheet('data')
+  def exportToXls(self, data, title):
+    wb = xlwt.Workbook('utf-8')
+    ws = wb.add_sheet('data')
+    n = len(data)
+    keyList = list(data.keys())
+    len2 = 0
+    # Put the elements in tuple in the right place
+    for x in range(n):
+      tuple = keyList[x]
+      len1 = len(tuple)
+      ws.write(x, len1-1, tuple[len1-1])
+      if len1 > len2:
+        len2 = len1
+    # Put the numbers of different keys in the right place
+    for x in range(n):
+      ws.write(x, len2, data[keyList[x]])
+    t = time.time()
+    name = './data/excel/{}-{}.xls'.format(title, str(int(t)))
+    wb.save(name)
   
   '''
   Export data to a bar char

@@ -89,6 +89,13 @@ def run(file):
     athome = statistics.compare('workCity','city')
     statistics.output(athome)
 
+    statistics.exportToXls(statistics.flatten(dream), 'dream')
+    statistics.exportToXls(statistics.flatten(study), 'study')
+    statistics.exportToXls(statistics.flatten(degree), 'degree')
+    statistics.exportToXls(statistics.flatten(work), 'work')
+    statistics.exportToXls(statistics.flatten(salary), 'salary')
+    statistics.exportToXls(statistics.flatten(athome), 'athome')
+
     statistics.exportToBarchart(
       statistics.calculate('province'),
       '居住省份',
@@ -118,7 +125,6 @@ def run(file):
       '预期月薪 (k)',
       '人数'
     )
-    
 
 if __name__ == '__main__':
   run() 
