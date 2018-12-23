@@ -508,7 +508,7 @@ statistics.exportToBarchart(
 )
 ```
 
-![screeshot](.././sceenshots/graph1.png)
+![screeshot](.././screenshots/graph1.png)
 
 生成饼图的函数
 
@@ -545,4 +545,4 @@ statistics.exportToPiechart(
 )
 ```
 
-![screeshot](.././sceenshots/graph2.png)
+![screeshot](.././screenshots/graph2.png)
