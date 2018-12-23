@@ -489,7 +489,17 @@ def exportToXls(self, data, title):
   wb.save(name)
 ```
 
-#### 运行截图
+示例结果
+
+```python
+work = statistics.calculate(
+  'workProvince',
+  'workCity',
+  'workPlace'
+)
+statistics.exportToXls(statistics.flatten(work), 'work')
+```
+
 ![sum7](.././screenshots/sum7.png)
 
 #### 导出为图表
