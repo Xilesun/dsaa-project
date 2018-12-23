@@ -168,7 +168,8 @@ class Statistics:
     y_pos = np.arange(len(xLabel))
     ax = f.add_subplot(111)
     bars = ax.bar(y_pos, yData, align='center', width=0.5)
-    ax.set_xticks(y_pos, xLabel)
+    ax.set_xticks(y_pos)
+    ax.set_xticklabels(xLabel)
     ax.set_ylabel(u'{}'.format(yLabel))
     ax.set_title(u'{}'.format(title))
 
