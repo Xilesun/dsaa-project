@@ -64,30 +64,46 @@ def run(file):
       'domesticUniversity',
       'major2',
     )
-    # statistics.output(dream)
-    # print('=== 国内外升学意愿 ===')
-    # study = statistics.calculate(
-    #   {'dream': ['出国留学', '香港读研', '内地读研']},
-    #   'degree'
-    # )
-    # statistics.output(study)
-    # print('=== 升学意愿单项对比 ===')
-    # degree = statistics.calculate('degree')
-    # statistics.output(degree)
-    # print('=== 工作目标城市及工作类型 ===')
-    # work = statistics.calculate(
-    #   'workProvince',
-    #   'workCity',
-    #   'workPlace'
-    # )
-    # statistics.output(work)
-    # print('=== 月薪 ===')
-    # salary = statistics.calculate('salary')
-    # statistics.output(salary)
-    # print('=== 是否在家乡工作 ===')
-    # athome = statistics.compare('workCity','city')
-    # statistics.output(athome)
-    print(statistics.flatten(dream))
+    statistics.output(dream)
+    print('=== 国内外升学意愿 ===')
+    study = statistics.calculate(
+      {'dream': ['出国留学', '香港读研', '内地读研']},
+      'degree'
+    )
+    statistics.output(study)
+    print('=== 升学意愿单项对比 ===')
+    degree = statistics.calculate('degree')
+    statistics.output(degree)
+    print('=== 工作目标城市及工作类型 ===')
+    work = statistics.calculate(
+      'workProvince',
+      'workCity',
+      'workPlace'
+    )
+    statistics.output(work)
+    print('=== 月薪 ===')
+    salary = statistics.calculate('salary')
+    statistics.output(salary)
+    print('=== 是否在家乡工作 ===')
+    athome = statistics.compare('workCity','city')
+    statistics.output(athome)
+
+    statistics.exportToBarchart(
+      statistics.calculate('province'),
+      '居住省份',
+      '人数'
+    )
+    statistics.exportToBarchart(
+      statistics.calculate('abroadCountry'),
+      '留学国家',
+      '人数'
+    )
+    statistics.exportToBarchart(
+      statistics.calculate('workCity'),
+      '目标工作城市',
+      '人数'
+    )
+    
 
 if __name__ == '__main__':
   run() 

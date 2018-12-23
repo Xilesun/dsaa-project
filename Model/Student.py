@@ -1,6 +1,10 @@
-# encoding=utf-8
+# -*- coding: utf-8 -*-
 
 class Student:
+  '''
+  Parameters:
+    data - a dict contains the data of each student
+  '''
   def __init__(self, data):
     self.id = data['id']
     self.name = data['name']

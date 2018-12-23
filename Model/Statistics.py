@@ -1,12 +1,31 @@
-# encoding=utf-8
+# -*- coding: utf-8 -*-
 import xlwt
 from itertools import chain, starmap
+import numpy as np
+import matplotlib.pyplot as plt;
+import time
+import matplotlib.font_manager as mfm
 
 class Statistics:
+  '''
+  Parameters:
+    students - a list of type Student
+  '''
   def __init__(self, students):
     self.students = students
+    plt.rcParams['font.sans-serif'] = ['Arial Unicode MS']
 
-  # Pluck the data of some fields
+  '''
+  Pluck the data of some fields
+  Parameters:
+    *fields (str,dict): the name of the fields to be pluck
+  Output:
+    [
+      {field1: value},
+      {field2: value},
+      ...
+    ]
+  '''
   def pluck(self, *fields):
     result = []
     # Store into dict
@@ -26,7 +45,24 @@ class Statistics:
         result.append(row.copy())
     return result   
 
-  # 统计数字，支持多层级
+  '''
+  Summation, support multi-level
+  Parameters:
+    *fields (str,dict): the name of the fields to be pluck
+  Output:
+    [
+      {
+        field1: {
+          data: ...,
+          subfield1: { ... }
+        }
+      },
+      {
+        field2: ...
+      },
+      ...
+    ]
+  '''
   def calculate(self, *fields):
     result = {}
     data = self.pluck(*fields)
@@ -50,6 +86,31 @@ class Statistics:
           parent[value]['data'] += 1
           parent = parent[value]
         
+    return result
+    
+  def processAbroadcountry(self, val):
+    return val.replace('国', '')
+
+  def processSalary(self, val):
+    int_value = int(val)
+    if  int_value > 1000:
+      return str(int(int_value/1000))
+    else :
+      return val
+
+  def compare(self, field1, field2):
+    result = {}
+    parent = {
+      'Yes': {'data': 0}, 
+      'No': {'data': 0}
+    }
+    data = self.pluck(field1, field2)
+    for row in data:
+      if row[field1]==row[field2]:
+        parent['Yes']['data'] += 1
+      else:
+        parent['No']['data'] += 1
+    result = parent
     return result
   
   def output(self, data, level=0):
@@ -88,29 +149,32 @@ class Statistics:
   # def exportToXls(self, data):
   #   wb = xlwt.Workbook()
   #   ws = wb.add_sheet('data')
-    
+  
+  '''
+  Export data to a bar char
+  Parameters:
+    data (dict): a non-nested dict like {field: {data: value}, ...}
+    title (str)
+    yLable (str)
+  '''
+  def exportToBarchart(self, data, title='', yLabel=''):
+    yData = ()
+    xLabel = ()
+    for k, v in data.items():
+      xLabel += (u'{}'.format(k),)
+      yData += (v['data'],)
 
-  def processAbroadcountry(self, val):
-    return val.replace('国', '')
+    plt.figure(figsize=(15, 10))
+    y_pos = np.arange(len(xLabel))
+    bars = plt.bar(y_pos, yData, align='center', width=0.5)
+    plt.xticks(y_pos, xLabel)
+    plt.ylabel(u'{}'.format(yLabel))
+    plt.title(u'{}'.format(title))
 
-  def processSalary(self, val):
-    int_value = int(val)
-    if  int_value > 1000:
-      return str(int(int_value/1000))
-    else :
-      return val
+    for bar in bars:
+      yval = bar.get_height()
+      plt.text(bar.get_x(), yval + .01, yval)
 
-  def compare(self, field1, field2):
-    result = {}
-    parent = {
-      'Yes': {'data': 0}, 
-      'No': {'data': 0}
-    }
-    data = self.pluck(field1, field2)
-    for row in data:
-      if row[field1]==row[field2]:
-        parent['Yes']['data'] += 1
-      else:
-        parent['No']['data'] += 1
-    result = parent
-    return result
+    t = time.time()
+    name = str(int(t))
+    plt.savefig('./data/graph/{}-{}.png'.format(title.replace(' ', ''), name))
