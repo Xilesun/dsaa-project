@@ -86,7 +86,7 @@ class Statistics:
 
     return dictionary  
 
-  def exportToXls(self, data):
+  def exportToXls(self, data, title):
     wb = xlwt.Workbook('utf-8')
     ws = wb.add_sheet('data')
     n = len(data)
@@ -103,7 +103,7 @@ class Statistics:
     for x in range(n):
       ws.write(x, len2, data[keyList[x]])
     t = time.time()
-    name = str(int(t))
+    name = './data/excel/' + title + '_' + str(int(t)) + '.xls'
     wb.save(name)
 
   def processAbroadcountry(self, val):
