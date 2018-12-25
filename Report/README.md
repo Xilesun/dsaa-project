@@ -1,3 +1,6 @@
+---
+CJKmainfont: Hiragino Sans GB
+---
 # Project报告
 
 ## 小组成员及分工
@@ -9,6 +12,12 @@
 11612929 杨洽 Design, Abstract Code; Code Review
 
 11613028 何雨京 Coding; 撰写和翻译报告
+
+## Project中的加分项
+
+- 直接用程序生成统计图表
+- 实验结果用程序保存为excel
+- 一定程度的容错处理
 
 ## 主程序说明和使用方法
 
